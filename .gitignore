@@ -9,6 +9,10 @@
 MemoryCaptures/
 Recordings/
 
+# Ignore Unity tutorial assets (auto-added by new project templates)
+Assets/TutorialInfo/
+
+
 # Rider / VS / JetBrains
 .vs/
 .idea/
