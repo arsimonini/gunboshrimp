@@ -17,22 +17,38 @@ public class Grid : MonoBehaviour
     [SerializeField] private int height;
     
     //Prefab to instantiate for each tile
-    [SerializeField] private Tile tilePrefab;
+    [SerializeField] private Tile normalTilePrefab;
+    [SerializeField] private Tile wallTilePrefab;
+    [SerializeField] private Tile lavaTilePrefab;
+    [SerializeField] private Tile coralTilePrefab;
+    [SerializeField] private Tile seaGrassTilePrefab;
+    [SerializeField] private Tile doorTilePrefab;
+
+    private Dictionary<TileType, Tile> tilePrefabs;
     
     //reference to main camera to center the view
     [SerializeField] private Transform cam;
 
     //Dictionary storing all tiles, using their grid position as the key
-    [SerializeField] private Dictionary<Vector2, Tile> tiles;
+    [SerializeField] public Dictionary<Vector2Int, Tile> tiles;
 
     void Awake() {
         Instance = this;
+
+        tilePrefabs = new Dictionary<TileType, Tile> {
+            {TileType.Normal, normalTilePrefab}, 
+            {TileType.Wall, wallTilePrefab}, 
+            {TileType.Lava, lavaTilePrefab}, 
+            {TileType.Coral, coralTilePrefab}, 
+            {TileType.SeaGrass, seaGrassTilePrefab},
+            {TileType.Door, doorTilePrefab}, 
+        };
     }
 
 
     //Called to generate the grid layour based on the background image and grid size
-    public void GenerateGrid() {
-        tiles = new Dictionary<Vector2, Tile>();
+    public void GenerateGrid(Dictionary<Vector2Int, TileType> specialTiles = null) {
+        tiles = new Dictionary<Vector2Int, Tile>();
 
         //Get the size of the background image in world units
         Bounds bounds = backgroundImage.bounds;
@@ -52,22 +68,45 @@ public class Grid : MonoBehaviour
             for(int y = 0; y < height; y++) {
                 //Calculate the position where teh tile should be spawned (center of cell)
                 Vector2 spawnPos = bottomLeft + new Vector2(x * cellWidth + cellWidth / 2, y * cellHeight + cellHeight / 2);
+                Vector2Int gridPos = new Vector2Int(x, y);
 
-                //Instantiate the tile prefav at the calculated position
-                var spawnedTile = Instantiate(tilePrefab, spawnPos, Quaternion.identity);
+                TileType type = TileType.Normal;
+
+
+                //Edge Walls
+                if(x == 0 || y == 0 || x == width - 1 || y == height - 1) {
+                    type = TileType.Wall;
+                }
+
+                //Override with speical tile if defined
+                if(specialTiles != null && specialTiles.TryGetValue(gridPos, out TileType customType)) {
+                    type = customType;
+                }
+
+                //Get the correct prefab for the tile type, if doesn't work, goes to default
+                if(!tilePrefabs.TryGetValue(type, out Tile prefabToUse)) {
+                    Debug.LogWarning($"No prefab found for tile type {type}, defaulting to normal tile prefab.");
+                    prefabToUse = normalTilePrefab;
+                }
+
+                //Instantiate the tile prefab at the calculated position
+                var spawnedTile = Instantiate(prefabToUse, spawnPos, Quaternion.identity);
                 spawnedTile.name = $"Tile {x} {y}";
 
                 //Set the tile's visual scale to fit the grid cell
                 spawnedTile.transform.localScale = new Vector3(cellWidth, cellHeight, 1f);
-                
+
+                //Apply the tile type
+                spawnedTile.setTileType(type);
+
                 //Store the tile in the dictionary with its grid coordinates
-                tiles[new Vector2(x, y)] = spawnedTile;
+                tiles[gridPos] = spawnedTile;
                 
             }
         }
 
         //Move the camera to the center of the grid
-        cam.transform.position = new Vector3(bounds.center.x, bounds.center.y, -10f);
+        cam.transform.position = new Vector3(bounds.center.x, bounds.center.y - 7.5f, -5f);
 
         //Chate the state to spawn the heros
         GameManager.Instance.ChangeState(GameState.SpawnHero);
@@ -85,7 +124,7 @@ public class Grid : MonoBehaviour
     }
 
     //Get the tile at a specific grid position, or return null if not found
-    public Tile GetTileAtPosition(Vector2 pos) {
+    public Tile GetTileAtPosition(Vector2Int pos) {
         if(tiles.TryGetValue(pos, out var tile)) {
             return tile;
         }

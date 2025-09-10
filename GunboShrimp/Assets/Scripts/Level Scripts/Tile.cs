@@ -62,5 +62,48 @@ public class Tile : MonoBehaviour
         unit.OccupiedTile = this;
     }
 
+    public void setTileType(TileType type) {
+        switch(type) {
+            case TileType.Wall:
+                isWalkable = false;
+                ren.color = Color.red;
+                break;
+            case TileType.Lava:
+                isWalkable = true;
+                //ren.color = Color.red;
+                break;
+            case TileType.Coral:
+                isWalkable = false;
+                ren.color = Color.pink;
+                break;
+            case TileType.SeaGrass:
+                isWalkable = false;
+                ren.color = Color.green;
+                break;
+            case TileType.Door:
+                isWalkable = true;
+                ren.color = Color.white;
+                break;
+            case TileType.Normal:
+                isWalkable = true;
+                ren.color = Color.white;
+                break;
+            default:
+                isWalkable = true;
+                ren.color = Color.white;
+                break;
+        }
+    }
 
 }
+
+
+    public enum TileType {
+        Normal = 0,
+        Wall = 1,
+        Lava = 2,
+        Coral = 3,
+        SeaGrass = 4,
+        Door = 5,
+    }
+

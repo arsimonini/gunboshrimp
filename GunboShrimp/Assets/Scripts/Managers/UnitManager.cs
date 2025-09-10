@@ -65,4 +65,12 @@ public class UnitManager : MonoBehaviour
     public void setSelectedHero(BaseHero hero) {
         selectedHero = hero;
     }
+
+    public int CheckActionPoints() {
+        GameManager.Instance.actionPoints = 3;
+
+        //Add If statements for things that might reduce or add action points at the start of the turn
+        
+        return GameManager.Instance.actionPoints;
+    }
 }
