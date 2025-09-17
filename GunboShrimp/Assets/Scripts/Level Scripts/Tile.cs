@@ -74,7 +74,7 @@ public class Tile : MonoBehaviour
                 break;
             case TileType.Coral:
                 isWalkable = false;
-                ren.color = Color.pink;
+                //ren.color = Color.pink;
                 break;
             case TileType.SeaGrass:
                 isWalkable = false;
