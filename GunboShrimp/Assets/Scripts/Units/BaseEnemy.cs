@@ -1,16 +1,27 @@
+using System.Collections;    
+using System.Collections.Generic;
 using UnityEngine;
+
 
 public class BaseEnemy : BaseUnit
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    public int currentActionPoints = 0;
+    public int maxActionPoints = 3;
+
+
+    public virtual void resetActionPoints()
     {
-        
+        currentActionPoints = 3;
     }
 
-    // Update is called once per frame
-    void Update()
+    public virtual IEnumerator takeTurn()
     {
-        
+        Debug.Log($"{name}: BaseEnemy.takeTurn() called.");
+        yield return null;
     }
+
+
+
+
 }

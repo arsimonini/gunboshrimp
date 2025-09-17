@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
+    [SerializeField] public Vector2Int gridPosition;
     [SerializeField] protected SpriteRenderer ren;
     [SerializeField] private GameObject highlight;
     [SerializeField] private bool isWalkable;

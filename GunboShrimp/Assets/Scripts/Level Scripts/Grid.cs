@@ -93,6 +93,10 @@ public class Grid : MonoBehaviour
                 var spawnedTile = Instantiate(prefabToUse, spawnPos, Quaternion.identity);
                 spawnedTile.name = $"Tile {x} {y}";
 
+                //Apply Grid Position
+                spawnedTile.gridPosition = gridPos;
+
+
                 //Set the tile's visual scale to fit the grid cell
                 spawnedTile.transform.localScale = new Vector3(cellWidth, cellHeight, 1f);
 

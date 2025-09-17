@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.XPath;
 
 public class BaseUnit : MonoBehaviour
 {
@@ -55,7 +56,7 @@ public class BaseUnit : MonoBehaviour
     }
 
 
-    private IEnumerator MoveToTile(Tile targetTile) {
+    protected IEnumerator MoveToTile(Tile targetTile) {
         Vector3 startPos = transform.position;
         Vector3 endPos = targetTile.transform.position;
 
@@ -113,6 +114,95 @@ public class BaseUnit : MonoBehaviour
         SouthEast,
         SouthWest,
     }
+
+    protected List<Tile> findPath(Tile startTile, Tile goalTile)
+    {
+        Vector2Int start = startTile.gridPosition;
+        Vector2Int goal = goalTile.gridPosition;
+
+        // Maps each node to its immediate predecessor
+        var cameFrom = new Dictionary<Vector2Int, Vector2Int>();
+
+        // Cost from start to node
+        var gScore = new Dictionary<Vector2Int, int> { [start] = 0 };
+
+        // Estimated total cost (start to goal through node)
+        var fScore = new Dictionary<Vector2Int, int> { [start] = Heuristic(start, goal) };
+
+
+        // Heuristic function
+        int Heuristic(Vector2Int a, Vector2Int b)
+        {
+            return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y); // Manhattan
+        }
+
+        // Set of discovered nodes to be evaluated
+        var openSet = new SortedSet<Vector2Int>(Comparer<Vector2Int>.Create((a, b) =>
+        {
+            int compare = fScore.GetValueOrDefault(a, int.MaxValue).CompareTo(fScore.GetValueOrDefault(b, int.MaxValue));
+            return compare == 0 ? a.GetHashCode().CompareTo(b.GetHashCode()) : compare;
+        }));
+        openSet.Add(start);
+
+  
+        while (openSet.Count > 0)
+        {
+            // Node in openSet with the lowest fScore
+            Vector2Int current = openSet.Min;
+            if (current == goal)
+                return ReconstructPath(cameFrom, current);
+
+            openSet.Remove(current);
+
+            foreach (Vector2Int direction in Directions)
+            {
+                Vector2Int neighbor = current + direction;
+                Tile neighborTile = Grid.Instance.GetTileAtPosition(neighbor);
+
+                if (neighborTile == null || !neighborTile.Walkable)
+                    continue;
+
+                int tentativeGScore = gScore.GetValueOrDefault(current, int.MaxValue) + 1;
+
+                if (tentativeGScore < gScore.GetValueOrDefault(neighbor, int.MaxValue))
+                {
+                    cameFrom[neighbor] = current;
+                    gScore[neighbor] = tentativeGScore;
+                    fScore[neighbor] = tentativeGScore + Heuristic(neighbor, goal);
+
+                    if (!openSet.Contains(neighbor))
+                        openSet.Add(neighbor);
+                }
+            }
+        }
+
+        // Failed to find a path
+        return null;
+    }
+
+    // Reconstructs the path from cameFrom map
+    private List<Tile> ReconstructPath(Dictionary<Vector2Int, Vector2Int> cameFrom, Vector2Int current)
+    {
+        List<Tile> totalPath = new List<Tile>();
+        totalPath.Add(Grid.Instance.GetTileAtPosition(current));
+
+        while (cameFrom.ContainsKey(current))
+        {
+            current = cameFrom[current];
+            totalPath.Add(Grid.Instance.GetTileAtPosition(current));
+        }
+
+        totalPath.Reverse();
+        return totalPath;
+    }
+
+    private readonly List<Vector2Int> Directions = new List<Vector2Int>
+    {
+        Vector2Int.up,
+        Vector2Int.down,
+        Vector2Int.left,
+        Vector2Int.right
+    };
 
 
 }

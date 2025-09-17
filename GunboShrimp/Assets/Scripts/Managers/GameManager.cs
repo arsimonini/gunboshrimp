@@ -67,12 +67,54 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.EnemyTurn:
                 Debug.Log("Changing State to Enemy Turn");
+                StartCoroutine(handleEnemyTurn());
+                //handleEnemyTurn();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
 
         }
     }
+
+    private IEnumerator handleEnemyTurn()
+    {
+        Debug.Log("handleEnemyTurn() started");
+
+        foreach (var enemy in UnitManager.Instance.enemies)
+        {
+            enemy.resetActionPoints();
+            Debug.Log($"Enemy {enemy.name} starting turn with {enemy.currentActionPoints} AP");
+
+            // ?? Safety timeout: prevent infinite coroutine
+            float timeout = 5f;
+            bool done = false;
+
+            StartCoroutine(EnemyTurnWithCallback(enemy, () => done = true));
+
+            while (!done && timeout > 0f)
+            {
+                timeout -= Time.deltaTime;
+                yield return null;
+            }
+
+            if (!done)
+            {
+                Debug.LogWarning($"Enemy {enemy.name} turn timed out!");
+            }
+        }
+
+        Debug.Log("All enemies finished their turn");
+
+        ChangeState(GameState.HeroTurn);
+    }
+
+    private IEnumerator EnemyTurnWithCallback(BaseEnemy enemy, Action onComplete)
+    {
+        yield return StartCoroutine(enemy.takeTurn());
+        onComplete?.Invoke();
+    }
+
+
 }
 
 public enum GameState
@@ -83,3 +125,5 @@ public enum GameState
     HeroTurn = 3,
     EnemyTurn = 4,
 }
+
+

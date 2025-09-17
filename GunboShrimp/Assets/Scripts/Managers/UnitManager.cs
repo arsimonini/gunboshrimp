@@ -13,6 +13,9 @@ public class UnitManager : MonoBehaviour
     //The hero currently selected by the player
     public BaseHero selectedHero;
 
+    public List<BaseHero> heroes = new();
+    public List<BaseEnemy> enemies = new();
+
     void Awake() {
         Instance = this;
 
@@ -28,6 +31,8 @@ public class UnitManager : MonoBehaviour
         for(int i = 0; i < heroCount; i++) {
             var randomPrefab = getRandomUnit<BaseHero>(Faction.Hero);
             var spawnedHero = Instantiate(randomPrefab);
+
+            heroes.Add(spawnedHero);
 
             var randomSpawnTile = Grid.Instance.GetHeroSpawnTile();
 
@@ -48,6 +53,8 @@ public class UnitManager : MonoBehaviour
         for(int i = 0; i < enemyCount; i++) {
             var randomPrefab = getRandomUnit<BaseEnemy>(Faction.Enemy);
             var spawnedEnemy = Instantiate(randomPrefab);
+
+            enemies.Add(spawnedEnemy);
 
             var randomSpawnTile = Grid.Instance.GetEnemySpawnTile();
 
