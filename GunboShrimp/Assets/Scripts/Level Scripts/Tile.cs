@@ -50,16 +50,16 @@ public class Tile : MonoBehaviour
     public void SetUnit(BaseUnit unit) {
 
         //if the unit was on another tile, clear that tile's reference
-        if(unit.OccupiedTile != null) {
+        if(unit.OccupiedTile != null && unit.OccupiedTile != this) {
             unit.OccupiedTile.OccupiedUnit = null;
         }
-        
-        //Move the unit's position to this tile's position
-        unit.transform.position = transform.position;
 
         //Set up two-way references between unit and tile
         OccupiedUnit = unit;
         unit.OccupiedTile = this;
+        
+        //Move the unit's position to this tile's position
+        unit.transform.position = transform.position;
     }
 
     public void setTileType(TileType type) {

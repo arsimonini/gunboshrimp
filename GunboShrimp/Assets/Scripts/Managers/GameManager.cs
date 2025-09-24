@@ -44,9 +44,7 @@ public class GameManager : MonoBehaviour
                     {center + Vector2Int.down, TileType.Wall},
                     {center + Vector2Int.left, TileType.Wall},
                     {center + Vector2Int.right, TileType.Wall}
-                    };
-
-
+                };
 
                 Grid.Instance.GenerateGrid(specialTiles);
                 break;
@@ -64,13 +62,29 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.EnemyTurn:
                 Debug.Log("Changing State to Enemy Turn");
+                StartCoroutine(EnemyTurnRoutine());
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
 
         }
     }
+
+
+    private IEnumerator EnemyTurnRoutine() {
+        Debug.Log("Starting Enemy Turn");
+
+        yield return UnitManager.Instance.ExecuteEnemyTurn();
+
+        Debug.Log("Enemy Turn Complete. Returning to Hero Turn.");
+
+        ChangeState(GameState.HeroTurn);
+    }
+
+
 }
+
+
 
 public enum GameState
 {

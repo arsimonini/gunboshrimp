@@ -74,7 +74,7 @@ public class UnitManager : MonoBehaviour
         selectedHero = hero;
     }
 
-    //TODO set this up to fully work
+    
     public void CheckActionPoints(BaseHero bh)
     {
         if (bh != null)
@@ -86,6 +86,21 @@ public class UnitManager : MonoBehaviour
         // GameManager.Instance.actionPoints = 0;
         Debug.Log("Base Hero is currently set to null, ");
         return;
+    }
+
+
+    public IEnumerator ExecuteEnemyTurn() {
+        foreach(var enemy in allEnemies) {
+
+        enemy.ResetActionPoints();
+
+        while(enemy.currentActionPoints > 0) {
+            yield return enemy.MoveRandom();
+        }
+
+        yield return new WaitForSeconds(0.25f);
+
+        }
     }
 
 }

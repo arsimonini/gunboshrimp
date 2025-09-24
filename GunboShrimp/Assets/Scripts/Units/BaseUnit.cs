@@ -26,42 +26,90 @@ public class BaseUnit : MonoBehaviour
     }
 
 
-    // Coroutine that handles step by step movement across tiles
     public IEnumerator MoveRoutine(MoveDirection direction, int distance, System.Action onComplete = null) {
-        
-        //Gets current position of the unit on the grid
         Vector2Int currentPos = Grid.Instance.tiles.FirstOrDefault(t => t.Value == OccupiedTile).Key;
-        
-        //Covert the direction enum into a directional vector
         Vector2Int dirVector = DirectionToVector2Int(direction);
+        Vector2Int nextPos = currentPos + dirVector;
 
-        //Move step by step in a specified direction for the given distance
-        for (int i = 0; i < distance; i++) {
-            Vector2Int nextPos = currentPos + dirVector;
-            
-            //gets the tiles next position
-            Tile nextTile = Grid.Instance.GetTileAtPosition(nextPos);
+        Tile nextTile = Grid.Instance.GetTileAtPosition(nextPos);
+        Tile startTile = OccupiedTile;
 
-            //Stops the movement if the tile is invalid or not walkable
-            if(nextTile == null || !nextTile.Walkable) {
-                Debug.Log("Cannot move further, tile is invalid or not walkable");
-                currentlyMoving = false;
-                yield break;
+        Vector3 startPos = transform.position;
+        Vector3 endPos = nextTile != null ? nextTile.transform.position : (startPos + new Vector3(dirVector.x, dirVector.y, 0));
+
+
+        float elapsed = 0f;
+        float duration = 0.3f;
+
+        currentlyMoving = true;
+
+        bool bounceBack = nextTile == null || !nextTile.Walkable;
+
+        // Move toward target position (even if blocked)
+        while (elapsed < duration / 2f) {
+            transform.position = Vector3.Lerp(startPos, endPos, elapsed / (duration / 2f));
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (bounceBack) {
+            // Snap halfway and return to original position
+            elapsed = 0f;
+            while (elapsed < duration / 2f) {
+                transform.position = Vector3.Lerp(endPos, startPos, elapsed / (duration / 2f));
+                elapsed += Time.deltaTime;
+                yield return null;
             }
 
-            //Smoothly move the unit to the next tile
-            yield return StartCoroutine(MoveToTile(nextTile));
-
-            //Update current position and occupied tile
-            currentPos = nextPos;
-            OccupiedTile = nextTile;
+            transform.position = startPos;
+        } else {
+            // Snap to final position
+            transform.position = endPos;
+            // OccupiedTile = nextTile;
+            nextTile.SetUnit(this);
         }
 
         currentlyMoving = false;
-
-        //Call the callback to notify that movement finished
         onComplete?.Invoke();
     }
+
+
+    // // Coroutine that handles step by step movement across tiles
+    // public IEnumerator MoveRoutine(MoveDirection direction, int distance, System.Action onComplete = null) {
+        
+    //     //Gets current position of the unit on the grid
+    //     Vector2Int currentPos = Grid.Instance.tiles.FirstOrDefault(t => t.Value == OccupiedTile).Key;
+        
+    //     //Covert the direction enum into a directional vector
+    //     Vector2Int dirVector = DirectionToVector2Int(direction);
+
+    //     //Move step by step in a specified direction for the given distance
+    //     for (int i = 0; i < distance; i++) {
+    //         Vector2Int nextPos = currentPos + dirVector;
+            
+    //         //gets the tiles next position
+    //         Tile nextTile = Grid.Instance.GetTileAtPosition(nextPos);
+
+    //         //Stops the movement if the tile is invalid or not walkable
+    //         if(nextTile == null || !nextTile.Walkable) {
+    //             Debug.Log("Cannot move further, tile is invalid or not walkable");
+    //             currentlyMoving = false;
+    //             yield break;
+    //         }
+
+    //         //Smoothly move the unit to the next tile
+    //         yield return StartCoroutine(MoveToTile(nextTile));
+
+    //         //Update current position and occupied tile
+    //         currentPos = nextPos;
+    //         OccupiedTile = nextTile;
+    //     }
+
+    //     currentlyMoving = false;
+
+    //     //Call the callback to notify that movement finished
+    //     onComplete?.Invoke();
+    // }
 
 
     private IEnumerator MoveToTile(Tile targetTile) {
