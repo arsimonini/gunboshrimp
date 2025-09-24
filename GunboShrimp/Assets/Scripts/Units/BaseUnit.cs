@@ -12,18 +12,22 @@ public class BaseUnit : MonoBehaviour
 
     
     //Public method to move the unit in a specified direction and distance
-    public void moveUnit(MoveDirection direction, int distance) {
+    public void moveUnit(MoveDirection direction, int distance, System.Action onComplete = null) {
         
+        if(currentlyMoving) {
+            return;
+        }
+
         currentlyMoving = true;
 
         //Coroutines handle movement over time
-        StartCoroutine(MoveRoutine(direction, distance));
+        StartCoroutine(MoveRoutine(direction, distance, onComplete));
         
     }
 
 
     // Coroutine that handles step by step movement across tiles
-    public IEnumerator MoveRoutine(MoveDirection direction, int distance) {
+    public IEnumerator MoveRoutine(MoveDirection direction, int distance, System.Action onComplete = null) {
         
         //Gets current position of the unit on the grid
         Vector2Int currentPos = Grid.Instance.tiles.FirstOrDefault(t => t.Value == OccupiedTile).Key;
@@ -42,7 +46,7 @@ public class BaseUnit : MonoBehaviour
             if(nextTile == null || !nextTile.Walkable) {
                 Debug.Log("Cannot move further, tile is invalid or not walkable");
                 currentlyMoving = false;
-                break;
+                yield break;
             }
 
             //Smoothly move the unit to the next tile
@@ -52,6 +56,11 @@ public class BaseUnit : MonoBehaviour
             currentPos = nextPos;
             OccupiedTile = nextTile;
         }
+
+        currentlyMoving = false;
+
+        //Call the callback to notify that movement finished
+        onComplete?.Invoke();
     }
 
 

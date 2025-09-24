@@ -13,6 +13,9 @@ public class UnitManager : MonoBehaviour
     //The hero currently selected by the player
     public BaseHero selectedHero;
 
+    public BaseHero heroReference = null;
+    public List<BaseEnemy> allEnemies = new List<BaseEnemy>();
+
     void Awake() {
         Instance = this;
 
@@ -30,6 +33,8 @@ public class UnitManager : MonoBehaviour
             var spawnedHero = Instantiate(randomPrefab);
 
             var randomSpawnTile = Grid.Instance.GetHeroSpawnTile();
+
+            heroReference = spawnedHero;
 
             randomSpawnTile.SetUnit(spawnedHero);
 
@@ -51,6 +56,9 @@ public class UnitManager : MonoBehaviour
 
             var randomSpawnTile = Grid.Instance.GetEnemySpawnTile();
 
+
+            allEnemies.Add(spawnedEnemy);
+
             randomSpawnTile.SetUnit(spawnedEnemy);
 
         }
@@ -66,11 +74,18 @@ public class UnitManager : MonoBehaviour
         selectedHero = hero;
     }
 
-    public int CheckActionPoints() {
-        GameManager.Instance.actionPoints = 3;
+    //TODO set this up to fully work
+    public void CheckActionPoints(BaseHero bh)
+    {
+        if (bh != null)
+        {
+            bh.ResetActionPoints();
+            return;
+        }
 
-        //Add If statements for things that might reduce or add action points at the start of the turn
-        
-        return GameManager.Instance.actionPoints;
+        // GameManager.Instance.actionPoints = 0;
+        Debug.Log("Base Hero is currently set to null, ");
+        return;
     }
+
 }

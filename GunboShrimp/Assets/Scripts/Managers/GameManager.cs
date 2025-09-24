@@ -27,9 +27,6 @@ public class GameManager : MonoBehaviour
     }
 
     void Update() {
-        if(GameState == GameState.HeroTurn && actionPoints == 0) {
-            ChangeState(GameState.EnemyTurn);
-        }
     }
 
     public void ChangeState(GameState newState) {
@@ -63,7 +60,7 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.HeroTurn:
                 Debug.Log("Changing State to Hero Turn");
-                UnitManager.Instance.CheckActionPoints();
+                UnitManager.Instance.CheckActionPoints(UnitManager.Instance.heroReference);
                 break;
             case GameState.EnemyTurn:
                 Debug.Log("Changing State to Enemy Turn");

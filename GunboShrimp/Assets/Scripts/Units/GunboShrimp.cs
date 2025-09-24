@@ -3,55 +3,44 @@ using UnityEngine;
 public class GunboShrimp : BaseHero
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected override void Start()
     {
-        
+        maxActionPoints = 3;
+        base.Start();
     }
 
-    // Update is called once per frame
-    void Update()
+
+    protected override void HandleMovementInput()
     {
-        if(currentlyMoving == false  && GameManager.Instance.GameState == GameState.HeroTurn) {
-            if(Input.GetKeyDown(KeyCode.S)) {
-                moveUnit(MoveDirection.Down, 1);
-                GameManager.Instance.actionPoints = GameManager.Instance.actionPoints - 1;
-            }
-
-            if(Input.GetKeyDown(KeyCode.W)) {
-                moveUnit(MoveDirection.Up, 1);
-                GameManager.Instance.actionPoints = GameManager.Instance.actionPoints - 1;
-            }
-
-            if(Input.GetKeyDown(KeyCode.A)) {
-                moveUnit(MoveDirection.Left, 1);
-                GameManager.Instance.actionPoints = GameManager.Instance.actionPoints - 1;
-            }
-
-            if(Input.GetKeyDown(KeyCode.D)) {
-                moveUnit(MoveDirection.Right, 1);
-                GameManager.Instance.actionPoints = GameManager.Instance.actionPoints - 1;
-            }
-
-            if(Input.GetKeyDown(KeyCode.Q)) {
-                moveUnit(MoveDirection.NorthWest, 1);
-                GameManager.Instance.actionPoints = GameManager.Instance.actionPoints - 1;
-            }
-
-            if(Input.GetKeyDown(KeyCode.E)) {
-                moveUnit(MoveDirection.NorthEast, 1);
-                GameManager.Instance.actionPoints = GameManager.Instance.actionPoints - 1;
-            }
-
-            if(Input.GetKeyDown(KeyCode.Z)) {
-                moveUnit(MoveDirection.SouthWest, 1);
-                GameManager.Instance.actionPoints = GameManager.Instance.actionPoints - 1;
-            }
-
-            if(Input.GetKeyDown(KeyCode.C)) {
-                moveUnit(MoveDirection.SouthEast, 1);
-                GameManager.Instance.actionPoints = GameManager.Instance.actionPoints - 1;
-            }
+        // Same controls you had before
+        if (Input.GetKeyDown(KeyCode.W)) {
+            TryMove(MoveDirection.Up, 1, 1);
         }
-        
+        else if (Input.GetKeyDown(KeyCode.S)) {
+            TryMove(MoveDirection.Down, 1, 1);
+        }
+        else if (Input.GetKeyDown(KeyCode.A)) {
+            TryMove(MoveDirection.Left, 1, 1);
+        }
+            
+        else if (Input.GetKeyDown(KeyCode.D)) {
+            TryMove(MoveDirection.Right, 1, 1);
+        }
+
+        else if (Input.GetKeyDown(KeyCode.Q)) {
+            TryMove(MoveDirection.NorthWest, 1, 1);
+        }
+            
+        else if (Input.GetKeyDown(KeyCode.E)) {
+            TryMove(MoveDirection.NorthEast, 1, 1);
+        }
+            
+        else if (Input.GetKeyDown(KeyCode.C)) {
+            TryMove(MoveDirection.SouthEast, 1, 1);
+        }
+            
+        else if (Input.GetKeyDown(KeyCode.Z)) {
+            TryMove(MoveDirection.SouthWest, 1, 1);
+        }
     }
 }
