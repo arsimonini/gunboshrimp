@@ -53,21 +53,28 @@ public class Grid : MonoBehaviour
         //Get the size of the background image in world units
         Bounds bounds = backgroundImage.bounds;
         float imageWidth = bounds.size.x;
-        float imageHeight = bounds.size.y;
+        float imageHeight = bounds.size.z > 0 ? bounds.size.z : bounds.size.y;
 
         //Calculate the size of each tile based on grid dimensions
         float cellWidth = imageWidth / width;
         float cellHeight = imageHeight / height;
 
         //bottom-left position of the grid (starting point)
-        Vector2 bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
+        Transform planeTransform = backgroundImage.transform;
+        
+        // Compute bottom-left corner of the plane in world space
+        Vector3 origin = planeTransform.position - new Vector3(imageWidth / 2f, 0, imageHeight / 2f);
+        
+        //Vector3 origin = bounds.center = planeTransform.right * (imageWidth / 2f) - planeTransform.forward * (imageHeight/2f);      
+        //Vector3 bottomLeft = new Vector3(bounds.min.x, bounds.min.y, bounds.min.z);
 
 
         //For each grid cell create a tile at the correct position
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
                 //Calculate the position where teh tile should be spawned (center of cell)
-                Vector2 spawnPos = bottomLeft + new Vector2(x * cellWidth + cellWidth / 2, y * cellHeight + cellHeight / 2);
+                //Vector3 spawnPos = origin + planeTransform.right * (x * cellWidth + cellWidth / 2f) + planeTransform.forward * (y * cellHeight + cellHeight / 2f);
+                Vector3 spawnPos = origin + new Vector3(x * cellWidth + cellWidth / 2f, 0, y * cellHeight + cellHeight / 2f);
                 Vector2Int gridPos = new Vector2Int(x, y);
 
                 TileType type = TileType.Normal;
@@ -90,7 +97,7 @@ public class Grid : MonoBehaviour
                 }
 
                 //Instantiate the tile prefab at the calculated position
-                var spawnedTile = Instantiate(prefabToUse, spawnPos, Quaternion.identity);
+                var spawnedTile = Instantiate(prefabToUse, spawnPos, planeTransform.rotation);
                 spawnedTile.name = $"Tile {x} {y}";
 
                 //Set the tile's visual scale to fit the grid cell
@@ -106,7 +113,8 @@ public class Grid : MonoBehaviour
         }
 
         //Move the camera to the center of the grid
-        cam.transform.position = new Vector3(bounds.center.x, bounds.center.y - 7.5f, -5f);
+        // cam.transform.position = bounds.center + planeTransform.up * 10f - planeTransform.forward * 10f;
+        // cam.transform.LookAt(bounds.center);
 
         //Chate the state to spawn the heros
         GameManager.Instance.ChangeState(GameState.SpawnHero);
